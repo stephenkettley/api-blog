@@ -2,6 +2,7 @@ from typing import Optional
 
 import uvicorn
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -33,6 +34,27 @@ def get_one_blog(id: int) -> dict:
 def show_blog_comments(id: int, limit: int = 10) -> dict:
     """Show comments of blog with specific id."""
     return {"data": f"{limit} comments from blog with id {id}"}
+
+
+class Blog(BaseModel):
+    """Validation class for blog request body."""
+
+    title: str
+    body: str
+    published: Optional[bool] = False
+
+
+@app.post("/blog")
+def create_blog(blog: Blog) -> dict:
+    """Create a new blog."""
+    return {
+        "message": "new blog has been created",
+        "data": {
+            "title": blog.title,
+            "body": blog.body,
+            "published": blog.published,
+        },
+    }
 
 
 if __name__ == "__main__":

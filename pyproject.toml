@@ -10,6 +10,7 @@ packages = [{include = "api_blog"}]
 python = "^3.10"
 fastapi = "^0.95.0"
 uvicorn = {extras = ["standard"], version = "^0.21.1"}
+pydantic = "^1.10.7"
 
 
 [tool.poetry.group.dev.dependencies]
