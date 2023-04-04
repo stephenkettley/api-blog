@@ -1,3 +1,5 @@
+from typing import Optional
+
 import uvicorn
 from fastapi import FastAPI
 
@@ -5,9 +7,14 @@ app = FastAPI()
 
 
 @app.get("/blog/all")
-def get_all_blogs() -> dict:
+def get_all_blogs(
+    limit: int = 10, published: bool = True, sort: Optional[str] = None
+) -> dict:
     """Get all blogs."""
-    return {"data": "list of all blogs"}
+    if published:
+        return {"data": f"list of {limit} published blogs"}
+    else:
+        return {"data": f"list of {limit} blogs"}
 
 
 @app.get("/blog/unpublished")
@@ -23,9 +30,9 @@ def get_one_blog(id: int) -> dict:
 
 
 @app.get("/blog/{id}/comments")
-def show_blog_comments(id: int) -> dict:
+def show_blog_comments(id: int, limit: int = 10) -> dict:
     """Show comments of blog with specific id."""
-    return {"data": f"comments of blog with id {id}"}
+    return {"data": f"{limit} comments from blog with id {id}"}
 
 
 if __name__ == "__main__":
