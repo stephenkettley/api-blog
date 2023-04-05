@@ -7,6 +7,14 @@ from pydantic import BaseModel
 app = FastAPI()
 
 
+class Blog(BaseModel):
+    """Validation class for blog request body."""
+
+    title: str
+    body: str
+    published: Optional[bool] = False
+
+
 @app.get("/blog/all")
 def get_all_blogs(
     limit: int = 10, published: bool = True, sort: Optional[str] = None
@@ -36,26 +44,11 @@ def show_blog_comments(id: int, limit: int = 10) -> dict:
     return {"data": f"{limit} comments from blog with id {id}"}
 
 
-class Blog(BaseModel):
-    """Validation class for blog request body."""
-
-    title: str
-    body: str
-    published: Optional[bool] = False
-
-
 @app.post("/blog")
 def create_blog(blog: Blog) -> dict:
     """Create a new blog."""
-    return {
-        "message": "new blog has been created",
-        "data": {
-            "title": blog.title,
-            "body": blog.body,
-            "published": blog.published,
-        },
-    }
+    return {"data": f"new blog called '{blog.title}' has been created"}
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", port=5000, reload=True, access_log=False)
+    uvicorn.run("main:app", port=8000, reload=True, access_log=False)
