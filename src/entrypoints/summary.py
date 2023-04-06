@@ -17,7 +17,7 @@ def get_db() -> None:
         db.close()
 
 
-@router.post("/blog/create", status_code=status.HTTP_201_CREATED)
+@router.post("/blog", status_code=status.HTTP_201_CREATED)
 def create_new_blog(blog: blog.Blog, db: Session = Depends(get_db)):
     """Creates a new blog."""
     new_blog = models.Blogs(title=blog.title, body=blog.body)
@@ -27,7 +27,43 @@ def create_new_blog(blog: blog.Blog, db: Session = Depends(get_db)):
     return new_blog
 
 
-@router.get("/blog/all", status_code=status.HTTP_200_OK)
+@router.delete("/blog/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_unique_blog(id: int, response: Response, db: Session = Depends(get_db)):
+    """Delete a blog with a unique id."""
+    fetched_blog = db.query(models.Blogs).filter(models.Blogs.id == id)
+    if not fetched_blog.first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"blog with id {id} does not exist for deletion",
+        )
+    else:
+        fetched_blog.delete(synchronize_session=False)
+        db.commit()
+
+
+@router.put("/blog/{id}", status_code=status.HTTP_202_ACCEPTED)
+def update_unique_blog(
+    id: int,
+    blog: blog.Blog,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    """Update a blog with a unique id."""
+    fetched_blog = db.query(models.Blogs).filter(models.Blogs.id == id)
+    if not fetched_blog.first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"blog with id {id} does not exist for updating",
+        )
+    else:
+        fetched_blog.update({"title": blog.title, "body": blog.body})
+        db.commit()
+        updated_blog = db.query(models.Blogs).filter(models.Blogs.id == id).first()
+
+        return updated_blog
+
+
+@router.get("/blog", status_code=status.HTTP_200_OK)
 def get_all_blogs(db: Session = Depends(get_db)) -> list:
     """Get all blogs from database."""
     blogs = db.query(models.Blogs).all()
