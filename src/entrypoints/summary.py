@@ -1,16 +1,41 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
-from src.entrypoints.schemas.schemas import Blog
+from src.database import models
+from src.database.database_connection import SessionLocal
+from src.entrypoints.schemas import blog
 
 router = APIRouter()
 
 
-@router.post("/blog/create")
-def create_new_blog(blog: Blog) -> dict:
-    return {
-        "new blog created": {
-            "title": blog.title,
-            "body": blog.body,
-            "published": blog.published,
-        }
-    }
+def get_db() -> None:
+    """Yields to the database."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@router.post("/blog/create", status_code=201)
+def create_new_blog(blog: blog.Blog, db: Session = Depends(get_db)):
+    """Creates a new blog."""
+    new_blog = models.Blogs(title=blog.title, body=blog.body)
+    db.add(new_blog)
+    db.commit()
+    db.refresh(new_blog)
+    return new_blog
+
+
+@router.get("/blog/all")
+def get_all_blogs(db: Session = Depends(get_db)) -> list:
+    """Get all blogs from database."""
+    blogs = db.query(models.Blogs).all()
+    return blogs
+
+
+@router.get("/blog/{id}")
+def get_unique_blog(id: int, db: Session = Depends(get_db)):
+    """Get onee blog based on a unique id."""
+    blog = db.query(models.Blogs).filter(models.Blogs.id == id).first()
+    return blog
