@@ -27,7 +27,7 @@ def get_db() -> None:
 )
 def create_new_blog(blog: Blog, db: Session = Depends(get_db)) -> ShowOneBlog:
     """Creates a new blog."""
-    new_blog = Blogs(title=blog.title, body=blog.body)
+    new_blog = Blogs(title=blog.title, body=blog.body, user_id=blog.user_id)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)

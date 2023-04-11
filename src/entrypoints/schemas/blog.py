@@ -6,6 +6,7 @@ class Blog(BaseModel):
 
     title: str
     body: str
+    user_id: int
 
 
 class ShowAllBlogs(BaseModel):

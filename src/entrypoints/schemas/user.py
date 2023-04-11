@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from src.entrypoints.schemas.blog import ShowOneBlog
+
 
 class User(BaseModel):
     """Structure of user creation request."""
@@ -14,6 +16,18 @@ class ShowOneUser(BaseModel):
 
     name: str
     email: str
+    blogs: list[ShowOneBlog]
+
+    class Config:
+        """ORM config class."""
+
+        orm_mode = True
+
+
+class ShowCreator(BaseModel):
+    """Structure of creator of a blog."""
+
+    name: str
 
     class Config:
         """ORM config class."""
