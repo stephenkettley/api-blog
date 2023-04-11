@@ -21,7 +21,7 @@ class ShowAllBlogs(BaseModel):
 
 
 class ShowOneBlog(BaseModel):
-    """Strucutre of one blog being fetched."""
+    """Structure of one blog being fetched."""
 
     title: str
     body: str
