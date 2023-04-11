@@ -14,7 +14,6 @@ class ShowOneUser(BaseModel):
 
     name: str
     email: str
-    password: str
 
     class Config:
         """ORM config class."""

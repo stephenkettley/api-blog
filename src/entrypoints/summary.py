@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from src.database.database_connection import SessionLocal
@@ -30,9 +30,7 @@ def create_new_blog(blog: Blog, db: Session = Depends(get_db)) -> ShowOneBlog:
 
 
 @router.delete("/blog/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_unique_blog(
-    id: int, response: Response, db: Session = Depends(get_db)
-) -> None:
+def delete_unique_blog(id: int, db: Session = Depends(get_db)) -> None:
     """Delete a blog with a unique id."""
     fetched_blog = db.query(Blogs).filter(Blogs.id == id)
     if not fetched_blog.first():
@@ -51,7 +49,6 @@ def delete_unique_blog(
 def update_unique_blog(
     id: int,
     blog: Blog,
-    response: Response,
     db: Session = Depends(get_db),
 ) -> ShowOneBlog:
     """Update a blog with a unique id."""
@@ -77,9 +74,7 @@ def get_all_blogs(db: Session = Depends(get_db)) -> list[ShowAllBlogs]:
 
 
 @router.get("/blog/{id}", status_code=status.HTTP_200_OK, response_model=ShowOneBlog)
-def get_unique_blog(
-    id: int, response: Response, db: Session = Depends(get_db)
-) -> ShowOneBlog:
+def get_unique_blog(id: int, db: Session = Depends(get_db)) -> ShowOneBlog:
     """Get one blog based on a unique id."""
     blog = db.query(Blogs).filter(Blogs.id == id).first()
     if not blog:
@@ -103,3 +98,15 @@ def create_user(user: User, db: Session = Depends(get_db)) -> ShowOneUser:
     db.commit()
     db.refresh(new_user)
     return new_user
+
+
+@router.get("/user/{id}", status_code=status.HTTP_200_OK, response_model=ShowOneUser)
+def get_unique_user(id: int, db: Session = Depends(get_db)) -> ShowOneUser:
+    """Get one blog based on a unique id."""
+    user = db.query(Users).filter(Users.id == id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"user with id {id} does not exist",
+        )
+    return user
