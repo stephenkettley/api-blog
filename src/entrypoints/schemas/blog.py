@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class Blog(BaseModel):
-    """Structure of a blog to be created."""
+    """Structure of a blog creation request."""
 
     title: str
     body: str

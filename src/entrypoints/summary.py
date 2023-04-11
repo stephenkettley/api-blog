@@ -19,7 +19,12 @@ def get_db() -> None:
         db.close()
 
 
-@router.post("/blog", status_code=status.HTTP_201_CREATED, response_model=ShowOneBlog)
+@router.post(
+    "/blog",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ShowOneBlog,
+    tags=["blogs"],
+)
 def create_new_blog(blog: Blog, db: Session = Depends(get_db)) -> ShowOneBlog:
     """Creates a new blog."""
     new_blog = Blogs(title=blog.title, body=blog.body)
@@ -29,7 +34,11 @@ def create_new_blog(blog: Blog, db: Session = Depends(get_db)) -> ShowOneBlog:
     return new_blog
 
 
-@router.delete("/blog/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/blog/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["blogs"],
+)
 def delete_unique_blog(id: int, db: Session = Depends(get_db)) -> None:
     """Delete a blog with a unique id."""
     fetched_blog = db.query(Blogs).filter(Blogs.id == id)
@@ -44,7 +53,10 @@ def delete_unique_blog(id: int, db: Session = Depends(get_db)) -> None:
 
 
 @router.put(
-    "/blog/{id}", status_code=status.HTTP_202_ACCEPTED, response_model=ShowOneBlog
+    "/blog/{id}",
+    status_code=status.HTTP_202_ACCEPTED,
+    response_model=ShowOneBlog,
+    tags=["blogs"],
 )
 def update_unique_blog(
     id: int,
@@ -66,14 +78,24 @@ def update_unique_blog(
         return updated_blog
 
 
-@router.get("/blog", status_code=status.HTTP_200_OK, response_model=list[ShowAllBlogs])
+@router.get(
+    "/blog",
+    status_code=status.HTTP_200_OK,
+    response_model=list[ShowAllBlogs],
+    tags=["blogs"],
+)
 def get_all_blogs(db: Session = Depends(get_db)) -> list[ShowAllBlogs]:
     """Get all blogs from database."""
     blogs = db.query(Blogs).all()
     return blogs
 
 
-@router.get("/blog/{id}", status_code=status.HTTP_200_OK, response_model=ShowOneBlog)
+@router.get(
+    "/blog/{id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ShowOneBlog,
+    tags=["blogs"],
+)
 def get_unique_blog(id: int, db: Session = Depends(get_db)) -> ShowOneBlog:
     """Get one blog based on a unique id."""
     blog = db.query(Blogs).filter(Blogs.id == id).first()
@@ -85,8 +107,13 @@ def get_unique_blog(id: int, db: Session = Depends(get_db)) -> ShowOneBlog:
     return blog
 
 
-@router.post("/user", status_code=status.HTTP_201_CREATED, response_model=ShowOneUser)
-def create_user(user: User, db: Session = Depends(get_db)) -> ShowOneUser:
+@router.post(
+    "/user",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ShowOneUser,
+    tags=["users"],
+)
+def create_new_user(user: User, db: Session = Depends(get_db)) -> ShowOneUser:
     """Creates a new user."""
     hashed_password = Hash.get_bcrypt_hashed_password(user.password)
     new_user = Users(
@@ -100,7 +127,12 @@ def create_user(user: User, db: Session = Depends(get_db)) -> ShowOneUser:
     return new_user
 
 
-@router.get("/user/{id}", status_code=status.HTTP_200_OK, response_model=ShowOneUser)
+@router.get(
+    "/user/{id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ShowOneUser,
+    tags=["users"],
+)
 def get_unique_user(id: int, db: Session = Depends(get_db)) -> ShowOneUser:
     """Get one blog based on a unique id."""
     user = db.query(Users).filter(Users.id == id).first()
