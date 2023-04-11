@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from src.database.database_connection import SessionLocal
+from src.database.hashing import Hash
 from src.database.models import Blogs, Users
 from src.entrypoints.schemas.blog import Blog, ShowAllBlogs, ShowOneBlog
 from src.entrypoints.schemas.user import ShowOneUser, User
@@ -92,10 +93,11 @@ def get_unique_blog(
 @router.post("/user", status_code=status.HTTP_201_CREATED, response_model=ShowOneUser)
 def create_user(user: User, db: Session = Depends(get_db)) -> ShowOneUser:
     """Creates a new user."""
+    hashed_password = Hash.get_bcrypt_hashed_password(user.password)
     new_user = Users(
         name=user.name,
         email=user.email,
-        password=user.password,
+        password=hashed_password,
     )
     db.add(new_user)
     db.commit()
