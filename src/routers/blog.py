@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from src.database.database_connection import get_db
-from src.database.models import Blogs, Users
+from src.repository.blog import create, delete, get_all, get_unique, update
 from src.schemas.blog import Blog, ShowAllBlogs, ShowOneBlog
 
 router = APIRouter(
@@ -11,42 +11,42 @@ router = APIRouter(
 )
 
 
+@router.get(
+    "/",
+    status_code=status.HTTP_200_OK,
+    response_model=list[ShowAllBlogs],
+)
+def get_all_blogs(db: Session = Depends(get_db)) -> list[ShowAllBlogs]:
+    """Get all blogs from database."""
+    return get_all(db=db)
+
+
 @router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
     response_model=ShowOneBlog,
 )
 def create_new_blog(blog: Blog, db: Session = Depends(get_db)) -> ShowOneBlog:
-    """Creates a new blog."""
-    user = db.query(Users).filter(Users.id == blog.user_id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"user with id {blog.user_id} does not exist",
-        )
-
-    new_blog = Blogs(title=blog.title, body=blog.body, user_id=blog.user_id)
-    db.add(new_blog)
-    db.commit()
-    db.refresh(new_blog)
-    return new_blog
+    """Create a new blog."""
+    return create(
+        blog=blog,
+        db=db,
+    )
 
 
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_unique_blog(id: int, db: Session = Depends(get_db)) -> None:
+def delete_unique_blog(
+    id: int,
+    db: Session = Depends(get_db),
+) -> None:
     """Delete a blog with a unique id."""
-    fetched_blog = db.query(Blogs).filter(Blogs.id == id)
-    if not fetched_blog.first():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"blog with id {id} does not exist for deletion",
-        )
-    else:
-        fetched_blog.delete(synchronize_session=False)
-        db.commit()
+    delete(
+        id=id,
+        db=db,
+    )
 
 
 @router.put(
@@ -60,29 +60,11 @@ def update_unique_blog(
     db: Session = Depends(get_db),
 ) -> ShowOneBlog:
     """Update a blog with a unique id."""
-    fetched_blog = db.query(Blogs).filter(Blogs.id == id)
-    if not fetched_blog.first():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"blog with id {id} does not exist for updating",
-        )
-    else:
-        fetched_blog.update({"title": blog.title, "body": blog.body})
-        db.commit()
-        updated_blog = db.query(Blogs).filter(Blogs.id == id).first()
-
-        return updated_blog
-
-
-@router.get(
-    "/",
-    status_code=status.HTTP_200_OK,
-    response_model=list[ShowAllBlogs],
-)
-def get_all_blogs(db: Session = Depends(get_db)) -> list[ShowAllBlogs]:
-    """Get all blogs from database."""
-    blogs = db.query(Blogs).all()
-    return blogs
+    return update(
+        id=id,
+        blog=blog,
+        db=db,
+    )
 
 
 @router.get(
@@ -92,10 +74,7 @@ def get_all_blogs(db: Session = Depends(get_db)) -> list[ShowAllBlogs]:
 )
 def get_unique_blog(id: int, db: Session = Depends(get_db)) -> ShowOneBlog:
     """Get one blog based on a unique id."""
-    blog = db.query(Blogs).filter(Blogs.id == id).first()
-    if not blog:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"blog with id {id} does not exist",
-        )
-    return blog
+    return get_unique(
+        id=id,
+        db=db,
+    )
