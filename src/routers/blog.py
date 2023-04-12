@@ -5,14 +5,16 @@ from src.database.database_connection import get_db
 from src.database.models import Blogs, Users
 from src.schemas.blog import Blog, ShowAllBlogs, ShowOneBlog
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/blog",
+    tags=["Blogs"],
+)
 
 
 @router.post(
-    "/blog",
+    "/",
     status_code=status.HTTP_201_CREATED,
     response_model=ShowOneBlog,
-    tags=["blogs"],
 )
 def create_new_blog(blog: Blog, db: Session = Depends(get_db)) -> ShowOneBlog:
     """Creates a new blog."""
@@ -31,9 +33,8 @@ def create_new_blog(blog: Blog, db: Session = Depends(get_db)) -> ShowOneBlog:
 
 
 @router.delete(
-    "/blog/{id}",
+    "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    tags=["blogs"],
 )
 def delete_unique_blog(id: int, db: Session = Depends(get_db)) -> None:
     """Delete a blog with a unique id."""
@@ -49,10 +50,9 @@ def delete_unique_blog(id: int, db: Session = Depends(get_db)) -> None:
 
 
 @router.put(
-    "/blog/{id}",
+    "/{id}",
     status_code=status.HTTP_202_ACCEPTED,
     response_model=ShowOneBlog,
-    tags=["blogs"],
 )
 def update_unique_blog(
     id: int,
@@ -75,10 +75,9 @@ def update_unique_blog(
 
 
 @router.get(
-    "/blog",
+    "/",
     status_code=status.HTTP_200_OK,
     response_model=list[ShowAllBlogs],
-    tags=["blogs"],
 )
 def get_all_blogs(db: Session = Depends(get_db)) -> list[ShowAllBlogs]:
     """Get all blogs from database."""
@@ -87,10 +86,9 @@ def get_all_blogs(db: Session = Depends(get_db)) -> list[ShowAllBlogs]:
 
 
 @router.get(
-    "/blog/{id}",
+    "/{id}",
     status_code=status.HTTP_200_OK,
     response_model=ShowOneBlog,
-    tags=["blogs"],
 )
 def get_unique_blog(id: int, db: Session = Depends(get_db)) -> ShowOneBlog:
     """Get one blog based on a unique id."""

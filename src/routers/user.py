@@ -6,14 +6,16 @@ from src.database.hashing import Hash
 from src.database.models import Users
 from src.schemas.user import ShowAllUsers, ShowOneUser, UpdateUser, User
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/user",
+    tags=["Users"],
+)
 
 
 @router.post(
-    "/user",
+    "/",
     status_code=status.HTTP_201_CREATED,
     response_model=ShowOneUser,
-    tags=["users"],
 )
 def create_new_user(user: User, db: Session = Depends(get_db)) -> ShowOneUser:
     """Creates a new user."""
@@ -30,10 +32,9 @@ def create_new_user(user: User, db: Session = Depends(get_db)) -> ShowOneUser:
 
 
 @router.get(
-    "/user/{id}",
+    "/{id}",
     status_code=status.HTTP_200_OK,
     response_model=ShowOneUser,
-    tags=["users"],
 )
 def get_unique_user(id: int, db: Session = Depends(get_db)) -> ShowOneUser:
     """Get one blog based on a unique id."""
@@ -47,10 +48,9 @@ def get_unique_user(id: int, db: Session = Depends(get_db)) -> ShowOneUser:
 
 
 @router.put(
-    "/user/{id}",
+    "/{id}",
     status_code=status.HTTP_202_ACCEPTED,
     response_model=ShowOneUser,
-    tags=["users"],
 )
 def update_unique_user(
     id: int,
@@ -73,10 +73,9 @@ def update_unique_user(
 
 
 @router.get(
-    "/user",
+    "/",
     status_code=status.HTTP_200_OK,
     response_model=list[ShowAllUsers],
-    tags=["users"],
 )
 def get_all_users(db: Session = Depends(get_db)) -> list[ShowAllUsers]:
     """Get all users from database."""
