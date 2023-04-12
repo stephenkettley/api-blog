@@ -4,14 +4,15 @@ from sqlalchemy.orm import Session
 from src.database.database_connection import get_db
 from src.database.hashing import Hash
 from src.database.models import Users
-from src.schemas.authentication import Login
+from src.schemas.authentication import Login, Token
 from src.schemas.user import UpdateUser
+from src.token import create_access_token
 
 router = APIRouter(tags=["Authentication"])
 
 
-@router.post("/login", response_model=UpdateUser)
-def login(login_details: Login, db: Session = Depends(get_db)) -> UpdateUser:
+@router.post("/login", response_model=Token)
+def login(login_details: Login, db: Session = Depends(get_db)) -> Token:
     """Validates and returns user logging in."""
     user = db.query(Users).filter(Users.email == login_details.username).first()
     if not user:
@@ -25,4 +26,5 @@ def login(login_details: Login, db: Session = Depends(get_db)) -> UpdateUser:
             detail="incorrect password",
         )
 
-    return user
+    access_token = create_access_token(data={"sub": user.email})
+    return {"access_token": access_token, "token_type": "bearer"}

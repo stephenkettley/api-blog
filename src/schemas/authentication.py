@@ -11,3 +11,16 @@ class Login(BaseModel):
         """ORM config class."""
 
         orm_mode = True
+
+
+class Token(BaseModel):
+    """Token info."""
+
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    """Token data."""
+
+    username: str | None = None
