@@ -1,22 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from src.database.database_connection import SessionLocal
-from src.database.hashing import Hash
+from src.database.database_connection import get_db
 from src.database.models import Blogs, Users
-from src.entrypoints.schemas.blog import Blog, ShowAllBlogs, ShowOneBlog
-from src.entrypoints.schemas.user import ShowOneUser, User
+from src.schemas.blog import Blog, ShowAllBlogs, ShowOneBlog
 
 router = APIRouter()
-
-
-def get_db() -> None:
-    """Yields to the database."""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post(
@@ -27,6 +16,13 @@ def get_db() -> None:
 )
 def create_new_blog(blog: Blog, db: Session = Depends(get_db)) -> ShowOneBlog:
     """Creates a new blog."""
+    user = db.query(Users).filter(Users.id == blog.user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"user with id {blog.user_id} does not exist",
+        )
+
     new_blog = Blogs(title=blog.title, body=blog.body, user_id=blog.user_id)
     db.add(new_blog)
     db.commit()
@@ -105,40 +101,3 @@ def get_unique_blog(id: int, db: Session = Depends(get_db)) -> ShowOneBlog:
             detail=f"blog with id {id} does not exist",
         )
     return blog
-
-
-@router.post(
-    "/user",
-    status_code=status.HTTP_201_CREATED,
-    response_model=ShowOneUser,
-    tags=["users"],
-)
-def create_new_user(user: User, db: Session = Depends(get_db)) -> ShowOneUser:
-    """Creates a new user."""
-    hashed_password = Hash.get_bcrypt_hashed_password(user.password)
-    new_user = Users(
-        name=user.name,
-        email=user.email,
-        password=hashed_password,
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
-
-
-@router.get(
-    "/user/{id}",
-    status_code=status.HTTP_200_OK,
-    response_model=ShowOneUser,
-    tags=["users"],
-)
-def get_unique_user(id: int, db: Session = Depends(get_db)) -> ShowOneUser:
-    """Get one blog based on a unique id."""
-    user = db.query(Users).filter(Users.id == id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"user with id {id} does not exist",
-        )
-    return user
