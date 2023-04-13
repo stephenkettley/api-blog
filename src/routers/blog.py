@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
+from src.authentication.oauth2 import get_current_user
 from src.database.database_connection import get_db
 from src.repository.blog import create, delete, get_all, get_unique, update
 from src.schemas.blog import Blog, ShowAllBlogs, ShowOneBlog
+from src.schemas.user import User
 
 router = APIRouter(
     prefix="/blog",
@@ -16,7 +18,9 @@ router = APIRouter(
     status_code=status.HTTP_200_OK,
     response_model=list[ShowAllBlogs],
 )
-def get_all_blogs(db: Session = Depends(get_db)) -> list[ShowAllBlogs]:
+def get_all_blogs(
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+) -> list[ShowAllBlogs]:
     """Get all blogs from database."""
     return get_all(db=db)
 
@@ -26,7 +30,11 @@ def get_all_blogs(db: Session = Depends(get_db)) -> list[ShowAllBlogs]:
     status_code=status.HTTP_201_CREATED,
     response_model=ShowOneBlog,
 )
-def create_new_blog(blog: Blog, db: Session = Depends(get_db)) -> ShowOneBlog:
+def create_new_blog(
+    blog: Blog,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> ShowOneBlog:
     """Create a new blog."""
     return create(
         blog=blog,
@@ -41,6 +49,7 @@ def create_new_blog(blog: Blog, db: Session = Depends(get_db)) -> ShowOneBlog:
 def delete_unique_blog(
     id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> None:
     """Delete a blog with a unique id."""
     delete(
@@ -58,6 +67,7 @@ def update_unique_blog(
     id: int,
     blog: Blog,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> ShowOneBlog:
     """Update a blog with a unique id."""
     return update(
@@ -72,7 +82,11 @@ def update_unique_blog(
     status_code=status.HTTP_200_OK,
     response_model=ShowOneBlog,
 )
-def get_unique_blog(id: int, db: Session = Depends(get_db)) -> ShowOneBlog:
+def get_unique_blog(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> ShowOneBlog:
     """Get one blog based on a unique id."""
     return get_unique(
         id=id,

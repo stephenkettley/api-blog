@@ -23,4 +23,4 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     """Token data."""
 
-    username: str | None = None
+    email: str | None = None
