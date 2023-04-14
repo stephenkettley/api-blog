@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from src.database import models
 from src.database.database_connection import engine
 from src.routers import authentication, blog, user
