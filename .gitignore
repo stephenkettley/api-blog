@@ -6,7 +6,6 @@
 # Directories
 
 .vscode/
-.vercel
 .vscode/
 __pycache__/
 pytest_cache/
