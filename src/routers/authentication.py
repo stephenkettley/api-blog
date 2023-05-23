@@ -6,7 +6,7 @@ from src.authentication.token import create_access_token
 from src.database.database_connection import get_db
 from src.database.hashing import Hash
 from src.database.models import Users
-from src.schemas.authentication import Login, Token
+from src.schemas.authentication import Token
 
 router = APIRouter(tags=["Authentication"])
 
